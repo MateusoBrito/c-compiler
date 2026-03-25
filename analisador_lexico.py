@@ -19,31 +19,40 @@ def main():
     batedor = 0
     classe = None
 
+    lista_tokens = []
+
+    linha = 0
+    coluna = 0
+
+    token = ""
+
     while batedor < len(file):
         c = file[batedor]
 
-        token = ""
         token += c
     
         delimitador = None
 
         if (classe == "IDENTIFICADOR" and c in SEPARADORES or c in OPERADORES 
-            or classe == "PALAVRAS_RESERVADAS" and c in SEPARADORES or c in OPERADORES
             or classe == "NUMERAL" and c in OPERADORES
             or classe == "SEPARADOR" and c in SEPARADORES
             or classe == "LITERAL" and c in SEPARADORES
             or classe == "COMENTARIO" and c in SEPARADORES
             or classe == "OPERADOR" and c in SEPARADORES
             ): 
-            
+
+            if classe == "IDENTIFICADOR" and token in PALAVRAS_RESERVADAS:
+                classe = "PALAVRA_RESERVADA"
+
             delimitador = c
+            lista_tokens.append([token,classe,linha,coluna])
+            classe = None
+            token = ""
 
 
         if delimitador == None:
             if re.fullmatch(IDENTIFICADOR, token):
                 classe = "IDENTIFICADOR"
-            elif re.fullmatch(PALAVRAS_RESERVADAS, token):
-                classe = "PALAVRAS_RESERVADAS"
             elif re.fullmatch(NUMERAL, token):
                 classe = "NUMERAL"
             elif re.fullmatch(SEPARADORES, token):
@@ -59,6 +68,11 @@ def main():
 
 
         batedor += 1
+        if c == '\n':
+            linhas += 1
+            colunas = 0
+        else:
+            colunas += 1
 
 
 if __name__ == "__main__":
