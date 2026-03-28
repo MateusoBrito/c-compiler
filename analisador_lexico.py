@@ -1,5 +1,5 @@
 import re
-import string as str
+import yaml
 
 SEPARADORES = ["    ","\n","(",")","{","}"," "]
 OPERADORES = ["=","+","-"]
@@ -8,10 +8,8 @@ NUMERAL = rf'[0-9]+'
 IDENTIFICADOR = rf'[A-Za-z_].*'
 COMENTARIO = r'(//.*\n|/\*.*\*/)'
 LITERAL = r'(\'[^\']*\'|\"[^\"]*\")'
-    
 
 def main():
-
     with open("codigo_entrada.c", "r") as f:
         file = f.read() 
 
@@ -21,47 +19,47 @@ def main():
 
     lista_tokens = []
 
-    linha = 0
-    coluna = 0
+    linhas = 0
+    colunas = 0
 
     token = ""
 
     while batedor < len(file):
         c = file[batedor]
-
-        token += c
     
         delimitador = None
 
         if (classe == "IDENTIFICADOR" and c in SEPARADORES or c in OPERADORES 
-            or classe == "NUMERAL" and c in OPERADORES
-            or classe == "SEPARADOR" and c in SEPARADORES
+            or classe == "PALAVRA_RESERVADA" and c in SEPARADORES
+            or classe == "NUMERAL" and c in OPERADORES or c in SEPARADORES
+            or classe == "SEPARADOR"
             or classe == "LITERAL" and c in SEPARADORES
-            or classe == "COMENTARIO" and c in SEPARADORES
-            or classe == "OPERADOR" and c in SEPARADORES
+            or classe == "COMENTARIO"
+            or classe == "OPERADOR" and c in SEPARADORES or c in IDENTIFICADOR
             ): 
 
-            if classe == "IDENTIFICADOR" and token in PALAVRAS_RESERVADAS:
-                classe = "PALAVRA_RESERVADA"
-
             delimitador = c
-            lista_tokens.append([token,classe,linha,coluna])
+            lista_tokens.append([token,classe,pivo,colunas])
+            pivo = batedor
             classe = None
             token = ""
 
+        token += c
 
         if delimitador == None:
             if re.fullmatch(IDENTIFICADOR, token):
-                classe = "IDENTIFICADOR"
+                if token in PALAVRAS_RESERVADAS:
+                    classe = "PALAVRA_RESERVADA"
+                else: classe = "IDENTIFICADOR"
             elif re.fullmatch(NUMERAL, token):
                 classe = "NUMERAL"
-            elif re.fullmatch(SEPARADORES, token):
+            elif token in SEPARADORES:
                 classe = "SEPARADOR"
             elif re.fullmatch(LITERAL, token):
                 classe = "LITERAL"
             elif re.fullmatch(COMENTARIO, token):
                 classe = "COMENTARIO"
-            elif re.fullmatch(OPERADORES, token):
+            elif token in OPERADORES:
                 classe = "OPERADOR"
         else:
             print("TOKEN ENCONTRANDO")
@@ -73,7 +71,9 @@ def main():
             colunas = 0
         else:
             colunas += 1
+    print(lista_tokens)
 
 
 if __name__ == "__main__":
     main()
+    
