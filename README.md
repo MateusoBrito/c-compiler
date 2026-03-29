@@ -6,6 +6,7 @@ A grande vantagem deste analisador é ser (quase) **genérico**: as regras de li
 
 ## Funcionalidades
 
+* **Execução via comando**: Suporte a argumentos de linha de comando (sys.argv), permitindo processar qualquer arquivo passando o caminho como primeiro argumento.
 * **Configuração Dinâmica**: Altere as regras da linguagem no `regras.yaml` sem mexer no código Python.
 * **Gestão de Erros**: Identifica caracteres que não pertencem a nenhuma classe definida na linha e coluna exatas.
 * **Saída Estruturada**: Gera um arquivo `tokens.csv` com a classificação completa de cada token encontrado.
