@@ -1,0 +1,24 @@
+PALAVRA_RESERVADA:
+  regras: '^(for|int|float|if|while)$'
+  delimitadores: ["SEPARADOR"]
+
+SEPARADOR:
+  regras: '[()\{\};]'
+
+COMENTARIO:
+  regras: '(//[^\n]*|/\*[\s\S]*?\*/)'
+
+OPERADOR:
+  regras: '(\+\+|--|\+=|-=|\*=|/=|==|!=|>=|<=|>|<|\+|-|\*|/|=|&&|\|\|)'
+  delimitadores: ["IDENTIFICADOR", "NUMERAL"]
+
+NUMERAL:
+  regras: '([0-9]+\.[0-9]*|[0-9]*\.[0-9]+|[0-9]+)'
+  delimitadores: ["SEPARADOR", "OPERADOR"]
+
+LITERAL:
+  regras: '(\"[^\"]*\"|''[^'']*'')'
+
+IDENTIFICADOR:
+  regras: '[A-Za-z_][A-Za-z0-9_]*'
+  delimitadores: ["SEPARADOR", "OPERADOR"]

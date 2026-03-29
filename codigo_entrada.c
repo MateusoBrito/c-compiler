@@ -1,6 +1,15 @@
 int main(){
     printf("Oi\n");
-    return 0;
 
-    int 9k = 5;
+    for(int i=0;i+=10.5;i<10){
+        printf("Tchau\n");
+    }
+
+    // oi
+
+    /* 
+    oitambem
+    */
+
+    return 0;
 }

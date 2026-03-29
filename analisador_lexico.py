@@ -1,83 +1,125 @@
 import re
+import sys
+import csv
 import yaml
 
-SEPARADORES = ["    ","\n","(",")","{","}"," ",";"]
-OPERADORES = ["=","+","-"]
-PALAVRAS_RESERVADAS = ["for", "int", "float", "if", "while"]
-NUMERAL = rf'[0-9]+'
-IDENTIFICADOR = rf'[A-Za-z_].*'
-COMENTARIO = r'(//.*\n|/\*.*\*/)'
-LITERAL = r'(\'[^\']*\'|\"[^\"]*\")'
+def read_file():
+    if len(sys.argv) < 2:
+        print("Uso: python3 analisador_lexico.py <nome_do_arquivo.c>")
+        return
+    file_path = sys.argv[1]
+    try:
+        with open(file_path, "r") as f:
+            file = f.read() 
+    except FileNotFoundError:
+        print(f"Erro: O arquivo '{file_path}' não foi encontrado.")
+        return
+    return file
+
+def read_rules(file_path="regras.yaml"):
+    try:
+        with open(file_path, 'r') as f:
+            data = yaml.safe_load(f)
+            if data is None:
+                return {}
+
+            rules = []
+            for nome_classe, propriedades in data.items():
+                propriedades['nome'] = nome_classe 
+                rules.append(propriedades)
+            
+            return rules
+
+    except FileNotFoundError:
+        print(f"Aviso: O arquivo '{file_path}' não foi encontrado.")
+        return {}
+    
+def save_tokens(lista_tokens):
+    with open("tokens.csv", "w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["token", "classe", "linha", "coluna"])
+        writer.writerows(lista_tokens)
+    
 
 def main():
-    with open("codigo_entrada.c", "r") as f:
-        file = f.read() 
-    
-    pivo = 0
+    file = read_file()
+    rules = read_rules()
+    if not rules:
+        print("Erro ao carregar regras.")
+        return
+
+
+    linhas = 1
+    colunas = 1
     batedor = 0
+
     classe = None
-
-    lista_tokens = []
-
-    linhas = 0
-    colunas = 0
-
     token = ""
+    lista_tokens = []
 
     while batedor < len(file):
         c = file[batedor]
-        print(c)
-        delimitador = None
-
-        if (
-            (classe == "IDENTIFICADOR" and (c in SEPARADORES or c in OPERADORES)) or
-            (classe == "PALAVRA_RESERVADA" and c in SEPARADORES) or
-            (classe == "NUMERAL" and (c in SEPARADORES or c in OPERADORES)) or
-            (classe == "LITERAL" and (c in SEPARADORES or re.fullmatch(c,IDENTIFICADOR))) or
-            (classe == "OPERADOR" and (c in SEPARADORES)) or
-            (classe == "COMENTARIO") or
-            (classe == "SEPARADOR")
-        ):
-            print("oi")
-            lista_tokens.append([token,classe,linhas,pivo])
-            pivo = batedor
-            classe = None
-            token = ""
-
-
-        token += c
-
-        #if delimitador == None:
-        if re.fullmatch(IDENTIFICADOR, token):
-            if token in PALAVRAS_RESERVADAS:
-                classe = "PALAVRA_RESERVADA"
-            else: classe = "IDENTIFICADOR"
-        elif re.fullmatch(NUMERAL, token):
-            classe = "NUMERAL"
-        elif token in SEPARADORES:
-            print("entrou")
-            classe = "SEPARADOR"
-        elif re.fullmatch(LITERAL, token):
-            classe = "LITERAL"
-        elif re.fullmatch(COMENTARIO, token):
-            classe = "COMENTARIO"
-        elif token in OPERADORES:
-            classe = "OPERADOR"
-        #else:
-            #print("TOKEN ENCONTRANDO")
-
-
-        batedor += 1
-        if c == '\n':
-            linhas += 1
-            colunas = 0
-        else:
+        
+        if c.isspace() and token == "":
+            if c == '\n':
+                linhas += 1
+                colunas = 0
+            batedor += 1
             colunas += 1
-    
-    if classe == "SEPARADOR": lista_tokens.append([token,classe,linhas,pivo])
-    print(lista_tokens)
+            continue
 
+        proximo = token + c
+        achou_classe = None
+
+        for item in rules:
+            if re.fullmatch(item['regras'], proximo):
+                achou_classe = item['nome']
+                break
+
+        if not achou_classe:
+            if not classe: 
+                if proximo.startswith('"') or proximo.startswith("'") or proximo.startswith('/'):
+                    achou_classe = 'INTERMEDIARIO'
+            elif re.fullmatch(r"[0-9]+\.", proximo) or proximo == ".":
+                achou_classe = 'INTERMEDIARIO'
+            elif proximo.startswith('/*') and classe != 'COMENTARIO':
+                achou_classe = 'INTERMEDIARIO'
+
+        if achou_classe:
+            if achou_classe != "INTERMEDIARIO":
+                classe = achou_classe
+            token += c
+            batedor += 1
+            colunas += 1
+        else:
+            valido = False
+            if classe:
+                if c.isspace():
+                    valido = True
+                else:
+                    current_rule = next((r for r in rules if r['nome'] == classe), None)
+                    
+                    if current_rule and 'delimitadores' in current_rule:
+                        for d_nome in current_rule['delimitadores']:
+                            target_rule = next((r for r in rules if r['nome'] == d_nome), None)
+                            if target_rule and re.fullmatch(target_rule['regras'], c):
+                                valido = True
+                                break
+                    else:
+                        valido = True
+            
+            if valido:
+                lista_tokens.append([token, classe, linhas, colunas - len(token)])
+                token = ""
+                classe = None
+            else:
+                print(f"Erro léxico na linha {linhas} e coluna {colunas}: {c}")
+                batedor += 1
+                colunas += 1
+
+    if classe == "SEPARADOR": lista_tokens.append([token, classe, linhas, colunas - len(token)])
+
+    save_tokens(lista_tokens)
 
 if __name__ == "__main__":
     main()
-    
