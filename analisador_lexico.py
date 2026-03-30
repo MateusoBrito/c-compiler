@@ -113,7 +113,8 @@ def main():
                 token = ""
                 classe = None
             else:
-                print(f"Erro léxico na linha {linhas} e coluna {colunas}: {c}")
+                print(f"Erro léxico na linha {linhas} e coluna {colunas}: {proximo}")
+                token = ""
                 batedor += 1
                 colunas += 1
 

@@ -9,11 +9,11 @@ COMENTARIO:
   regras: '(//[^\n]*|/\*[\s\S]*?\*/)'
 
 OPERADOR:
-  regras: '(\+\+|--|\+=|-=|\*=|/=|==|!=|>=|<=|>|<|\+|-|\*|/|=|&&|\|\|)'
+  regras: '(\+\+|--|\+=|-=|\*=|/=|==|!=|>=|<=|>|<|<<|>>|\+|-|\*|/|=|&&|\|\|)'
   delimitadores: ["IDENTIFICADOR", "NUMERAL"]
 
 NUMERAL:
-  regras: '([0-9]+\.[0-9]*|[0-9]*\.[0-9]+|[0-9]+)'
+  regras: '([0-9]*\.[0-9]+|[0-9]+)'
   delimitadores: ["SEPARADOR", "OPERADOR"]
 
 LITERAL:

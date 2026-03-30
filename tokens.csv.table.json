@@ -1,0 +1,40 @@
+{
+  "columns": [
+    {
+      "field": "token",
+      "title": "token",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 104
+    },
+    {
+      "field": "classe",
+      "title": "classe",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "string",
+      "headerSort": true,
+      "width": 153
+    },
+    {
+      "field": "linha",
+      "title": "linha",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 96
+    },
+    {
+      "field": "coluna",
+      "title": "coluna",
+      "minWidth": 40,
+      "resizable": true,
+      "sorter": "number",
+      "headerSort": true,
+      "width": 885
+    }
+  ]
+}
