@@ -5,11 +5,15 @@ int main(){
         printf("Tchau\n");
     }
 
-    // oi
+    int x = 5;
 
-    /* 
-    oitambem
-    */
+    y=7;
+
+    int c;
+
+    if(x>=5){
+        a=5;
+    }
 
     return 0;
 }
