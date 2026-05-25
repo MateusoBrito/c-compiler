@@ -21,15 +21,15 @@ def main():
         sys.exit(1)
         
     #lexico.salvar_tokens_csv("tokens.csv")
-    #print("✓ Análise Léxica concluída. (tokens.csv gerado)")
+    #print("Análise Léxica concluída. (tokens.csv gerado)")
     
     # 3. Inicia e executa a Análise Sintática
     print("Iniciando Análise Sintática...")
     parser = Parser(lista_de_tokens)
     
     try:
-        parser.parse_programa() # Chama a raiz da sua árvore
-        print(" Análise Sintática concluída com sucesso! Nenhuma violação encontrada.")
+        parser.parse_programa() 
+        print(" Análise Sintática concluída!")
     except Exception as e:
         print(f"\n Falha na compilação:\n{e}")
 

@@ -1,6 +1,5 @@
 class Parser:
     def __init__(self,tokens):
-        """Tokens é uma lista de tokens gerados pelo analisador léxico"""
         self.tokens = tokens
         self.pos = 0
         self.token_atual = self.tokens[self.pos] if tokens else None
@@ -16,69 +15,89 @@ class Parser:
         else:
             self.token_atual = None
 
+    def sincronizar(self, tokens_sincronizacao=[';']):
+        while self.token_atual:
+
+            if self.token_atual['token'] in tokens_sincronizacao:
+                self.proximo_token()
+                return
+
+            self.proximo_token()
+    
+    def erro(self, mensagem, sincronizacao=[';']):
+        print(
+            f"Erro Sintático na linha:"
+            f"{self.token_atual['linha']} | coluna: {self.token_atual['coluna']} "
+            f"{mensagem}"
+        )
+        self.sincronizar(sincronizacao)
+
     def eat(self, classe_esperada, token_esperado=None):
         """
         Consome o token se for da classe esperada.
         Se 'token_esperado' for informado, valida também o texto exato.
         """
-        if self.token_atual and self.token_atual['classe'] == classe_esperada:
-            if token_esperado and self.token_atual['token'] != token_esperado:
-                raise Exception(f"Erro Sintático na linha {self.token_atual['linha']}: "
-                                f"Esperado '{token_esperado}', encontrado '{self.token_atual['token']}'")
-            
-            self.proximo_token()
-        else:
-            raise Exception(f"Erro Sintático: Esperado classe {classe_esperada}, "
-                            f"encontrado {self.token_atual['classe']} na linha {self.token_atual['linha']}")
+        if not self.token_atual:
+            self.erro("Fim inesperado do arquivo")
+            return False
+
+        if self.token_atual['classe'] != classe_esperada:
+            self.erro(f"Esperado classe {classe_esperada}, "
+                f"encontrado {self.token_atual['classe']}")
+            return False
+
+        if(token_esperado and self.token_atual['token'] != token_esperado):
+            self.erro(f"Esperado '{token_esperado}', "
+                f"encontrado '{self.token_atual['token']}'")
+            return False
+        self.proximo_token()
+        return True
     
-    #TODO comandos sem {}
-    #TODO tratamento de erro
-
-    """
-    E -> BE'
-    E' -> C | D
-    C -> E
-    D -> A
-    """
     def parse_condicao(self):
-        self.eat('PALAVRA_RESERVADA') 
-        self.eat('SEPARADOR', token_esperado='(')
-        self.parse_expressao()
-        self.eat('SEPARADOR', token_esperado=')') 
-        self.eat('SEPARADOR', token_esperado='{')
-        self.parse_bloco()
-        self.eat('SEPARADOR', token_esperado='}')
+        try:
+            self.eat('PALAVRA_RESERVADA') 
+            self.eat('SEPARADOR', token_esperado='(')
+            self.parse_expressao()
+            self.eat('SEPARADOR', token_esperado=')') 
+            self.eat('SEPARADOR', token_esperado='{')
+            self.parse_bloco()
+            self.eat('SEPARADOR', token_esperado='}')
 
-        if self.token_atual['token'] == 'else':
-            self.eat('PALAVRA_RESERVADA', token_esperado='else')
-            if self.token_atual['token'] == 'if':
-                self.parse_condicao()
-            else:
-                self.eat('SEPARADOR', token_esperado='{')
-                self.parse_bloco()
-                self.eat('SEPARADOR', token_esperado='}')
+            if self.token_atual and self.token_atual['token'] == 'else':
+                self.eat('PALAVRA_RESERVADA', token_esperado='else')
+                if self.token_atual and self.token_atual['token'] == 'if':
+                    self.parse_condicao()
+                else:
+                    self.eat('SEPARADOR', token_esperado='{')
+                    self.parse_bloco()
+                    self.eat('SEPARADOR', token_esperado='}')
+        except Exception as e:
+            self.erro(str(e), ['}'])
         
 
     def parse_repeticao(self):
-        if self.token_atual['token'] == 'for':
-            self.eat('PALAVRA_RESERVADA') 
-            self.eat('SEPARADOR', token_esperado='(')
-            self.parse_declaracao()
-            self.parse_expressao()
-            self.eat('SEPARADOR', token_esperado=';')
-            self.parse_expressao()
-            self.eat('SEPARADOR', token_esperado=')') 
-            self.eat('SEPARADOR', token_esperado='{')
-            self.parse_bloco()
-            self.eat('SEPARADOR', token_esperado='}')
-        elif self.token_atual['token'] == 'while':
-            self.eat('PALAVRA_RESERVADA') 
-            self.eat('SEPARADOR', token_esperado='(')
-            self.parse_expressao()
-            self.eat('SEPARADOR', token_esperado=')') 
-            self.eat('SEPARADOR', token_esperado='{')
-            self.parse_bloco()
-            self.eat('SEPARADOR', token_esperado='}')
+        try:
+            if self.token_atual['token'] == 'for':
+                self.eat('PALAVRA_RESERVADA') 
+                self.eat('SEPARADOR', token_esperado='(')
+                self.parse_declaracao()
+                self.parse_expressao()
+                self.eat('SEPARADOR', token_esperado=';')
+                self.parse_expressao()
+                self.eat('SEPARADOR', token_esperado=')') 
+                self.eat('SEPARADOR', token_esperado='{')
+                self.parse_bloco()
+                self.eat('SEPARADOR', token_esperado='}')
+            elif self.token_atual['token'] == 'while':
+                self.eat('PALAVRA_RESERVADA') 
+                self.eat('SEPARADOR', token_esperado='(')
+                self.parse_expressao()
+                self.eat('SEPARADOR', token_esperado=')') 
+                self.eat('SEPARADOR', token_esperado='{')
+                self.parse_bloco()
+                self.eat('SEPARADOR', token_esperado='}')
+        except Exception as e:
+            self.erro(str(e), ['}'])
 
     def parse_parametros(self):
         # Verifica se não é uma função vazia ex: main()
@@ -133,11 +152,18 @@ class Parser:
             self.eat('LITERAL')
 
         else:
-            raise Exception(f"Erro Sintático na linha {self.token_atual['linha']}: "
-                            f"Início de expressão inválido: '{self.token_atual['token']}'")
+            self.erro(
+                f"Início de expressão inválido: "
+                f"'{self.token_atual['token']}'",
+            )
+            return
 
-        # Verifica se ainda temos tokens e se o próximo é um operador matemático (e não um '=' de atribuição)
-        if self.token_atual and self.token_atual['classe'] == 'OPERADOR' and self.token_atual['token'] != '=':
+        operadores = [
+            '+', '-', '*', '/',
+            '==', '!=', '+=',
+            '<', '>', '<=', '>='
+        ]
+        if ( self.token_atual and self.token_atual['classe'] == 'OPERADOR' and self.token_atual['token'] in operadores):
             self.eat('OPERADOR')
             self.parse_expressao() # Continua a cadeia da expressão
     
@@ -157,18 +183,20 @@ class Parser:
     def parse_atribuicao(self):
         self.eat('IDENTIFICADOR')     
 
-        if self.token_atual['token'] == '=':
+        operadores_atribuicao = ['=', '+=', '-=', '*=', '/=']
+
+        if (self.token_atual and self.token_atual['token'] in operadores_atribuicao):
             # Cenário 1: É uma atribuição pura (ex: x = 5;)
             self.eat('OPERADOR', token_esperado='=')
             self.parse_expressao()
             self.eat('SEPARADOR', token_esperado=';')
             
-        elif self.token_atual['token'] == '(':
+        elif self.token_atual and self.token_atual['token'] == '(':
             # Cenário 2: É uma chamada de função! (ex: printf("Oi"); )
             self.eat('SEPARADOR', token_esperado='(')
             
             # Verifica se tem argumentos dentro dos parênteses (Expressões)
-            if self.token_atual['token'] != ')':
+            if self.token_atual and self.token_atual['token'] != ')':
                 self.parse_expressao() # Lê o primeiro argumento
                 
                 # Se tiver vírgula, tem mais argumentos (ex: soma(a, b))
@@ -180,7 +208,8 @@ class Parser:
             self.eat('SEPARADOR', token_esperado=';')
             
         else:
-            raise Exception(f"Erro Sintático na linha {self.token_atual['linha']}: Esperado '=' ou '(' após identificador")
+            self.erro("Esperado '=' ou '(' após identificador")
+            return
     
     def parse_retorno(self):
         """Lida com o comando: return 0; ou return x + 5;"""
@@ -215,10 +244,11 @@ class Parser:
 
             # 6. Tratamento de erro 
             else:
-                raise Exception(f"Erro Sintático na linha {self.token_atual['linha']}: "
-                                f"Comando não reconhecido '{token}'.")
+                self.erro(f"Comando não reconhecido '{token}'")
     
     def parse_programa(self):
-        """Ponto de entrada do compilador"""
         while self.token_atual:
-            self.parse_declaracao()
+            try:
+                self.parse_declaracao()
+            except Exception as e:
+                self.erro(str(e))

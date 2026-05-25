@@ -1,5 +1,5 @@
 PALAVRA_RESERVADA:
-  regras: '^(for|int|float|if|while|return)$'
+  regras: '^(for|int|float|if|while|return|else)$'
   delimitadores: ["SEPARADOR"]
 
 SEPARADOR:
