@@ -1,5 +1,4 @@
 import sys
-# Importa as suas classes
 from analisador_lexico import AnalisadorLexico
 from analisador_sintatico import Parser 
 
@@ -10,7 +9,6 @@ def main():
         
     arquivo_fonte = sys.argv[1]
     
-    # 2. Inicia e executa a Análise Léxica
     print(f"Iniciando compilação de: {arquivo_fonte}")
     lexico = AnalisadorLexico("regras.yaml")
     
@@ -20,7 +18,7 @@ def main():
         print("Falha na análise léxica. Processo abortado.")
         sys.exit(1)
         
-    #lexico.salvar_tokens_csv("tokens.csv")
+    lexico.salvar_tokens_csv("tokens.csv")
     #print("Análise Léxica concluída. (tokens.csv gerado)")
     
     # 3. Inicia e executa a Análise Sintática

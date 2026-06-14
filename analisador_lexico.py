@@ -70,8 +70,12 @@ class AnalisadorLexico:
                     break
 
             if not achou_classe:
-                if not classe: 
+                if not classe:
                     if proximo.startswith('"') or proximo.startswith("'") or proximo.startswith('/'):
+                        achou_classe = 'INTERMEDIARIO'
+                    # CORREÇÃO: + e - sozinhos ficam em INTERMEDIARIO para permitir
+                    # acumular o segundo caractere e reconhecer ++ e --
+                    elif proximo in ('+', '-'):
                         achou_classe = 'INTERMEDIARIO'
                 elif re.fullmatch(r"[0-9]+\.", proximo) or proximo == ".":
                     achou_classe = 'INTERMEDIARIO'
@@ -102,7 +106,6 @@ class AnalisadorLexico:
                             valido = True
                 
                 if valido:
-                    # SALVANDO COMO DICIONÁRIO PARA COMPATIBILIDADE COM O PARSER
                     self.lista_tokens.append({
                         'token': token, 
                         'classe': classe, 
@@ -112,12 +115,16 @@ class AnalisadorLexico:
                     token = ""
                     classe = None
                 else:
+                    # CORREÇÃO: token em INTERMEDIARIO (ex: '+' sozinho antes de checar '++')
+                    # nunca chegará aqui porque + e - são marcados como INTERMEDIARIO acima.
+                    # Este bloco trata erros léxicos genuínos.
                     print(f"Erro léxico na linha {linhas} e coluna {colunas}: {proximo}")
                     token = ""
+                    classe = None
                     batedor += 1
                     colunas += 1
 
-        # Salva o último token caso o arquivo termine abruptamente
+        # Salva o último token caso o arquivo termine sem espaço no final
         if classe: 
             self.lista_tokens.append({
                 'token': token, 
