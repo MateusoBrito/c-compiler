@@ -1,13 +1,22 @@
 int main(){
-    printf("Oi\n");
 
-    for(int i=0;i<10.5;i++){
-        printf("Tchau\n");
+    int controle = 0;
+    float controle = 5.5; 
+
+    int vida = 100; 
+
+    if (vida > 50) {
+        float vida = 10.5; 
+        vida = 20.0;
     }
+
+    vida = 90; 
+
 
     while(i == 1){
         if(a == 0){
             i+=1;
+            int y;
         }
     }
 
