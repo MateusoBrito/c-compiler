@@ -22,12 +22,12 @@ def main():
     #print("Análise Léxica concluída. (tokens.csv gerado)")
     
     # 3. Inicia e executa a Análise Sintática
-    print("Iniciando Análise Sintática...")
+    print("Iniciando Análise Sintática e Semântica...")
     parser = Parser(lista_de_tokens)
     
     try:
         parser.parse_programa() 
-        print(" Análise Sintática concluída!")
+        print(" Análise Sintática e Semântica concluída!")
     except Exception as e:
         print(f"\n Falha na compilação:\n{e}")
 

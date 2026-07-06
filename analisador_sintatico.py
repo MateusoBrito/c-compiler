@@ -131,13 +131,14 @@ class Parser:
             self.eat('SEPARADOR', token_esperado='}')
 
     def avaliar_operacao(self, tipo1,tipo2, operador):
-
             REGRAS_TIPO = {
                 ('int', 'int'): 'int',
                 ('float', 'float'): 'float',
                 ('char', 'char'): 'char',
                 ('int', 'float'): 'float',
-                ('float', 'int'): 'float',
+                ('float', 'int'): 'float', 
+                ('char', 'int'): 'int',
+                ('int', 'char'): 'int',
             }
             
             if operador in ['==', '!=', '<', '>', '<=', '>=']:
@@ -229,7 +230,17 @@ class Parser:
     def parse_bloco(self):
         self.tabela.empilhar_escopo()
 
+        teve_retorno = False
+
         while self.token_atual and self.token_atual['token'] != '}':
+
+            if teve_retorno:
+                linha_morta = self.token_atual['linha']
+                print(f"Warning Semântico na linha {linha_morta}: Código inatingível.")
+                while self.token_atual and self.token_atual['token'] != '}':
+                    self.proximo_token()
+                break
+
             token = self.token_atual['token']
             classe = self.token_atual['classe']
 
@@ -242,6 +253,7 @@ class Parser:
                     self.parse_declaracao()
                 elif token == 'return':
                     self.parse_retorno()
+                    teve_retorno = True
                 elif classe == 'IDENTIFICADOR':
                     self.parse_atribuicao()
                 else:

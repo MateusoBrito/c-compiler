@@ -11,8 +11,21 @@ int main(){
     }
 
     vida = 90; 
+    
+    int numero = 5;
+    char letra = "A";
 
+    numero = numero + letra;
 
+    int numero2 = 5;
+    float numero3 = 5.5;
+    numero2 = numero2+numero3;
+
+    if (vida + numero3 > 5.0) {
+        numero2 = 1;
+    }
+
+    int i;
     while(i == 1){
         if(a == 0){
             i+=1;
@@ -21,15 +34,9 @@ int main(){
     }
 
     int x = 5;
-
     y=7;
-
     int c;
 
-    if(x>=5){
-        a=5;
-    }
-    
     if(x>5){
         int x =5
     } else if(x==5){
@@ -39,4 +46,8 @@ int main(){
     }
 
     return 0;
+
+
+    int a
+    int b
 }
